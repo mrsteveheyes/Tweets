@@ -27,7 +27,7 @@ var global_socket;
 
 // WEB SOCKETS
 io.sockets.on('connection', function (socket) {
-  global_socket = socket;
+	global_socket = socket;
 });
 
 // END SETUP
@@ -36,11 +36,12 @@ io.sockets.on('connection', function (socket) {
 app.get("/", function(req, res){
 	
 	// Start Twitter Stream
-	twit.stream('statuses/filter', {track: "#dearyoungself"}, function(stream) {
+	twit.stream('statuses/filter', {track: "#nodetwitter"}, function(stream) {
 	    stream.on('data', function (data) {
 			// Emits on event "twit"
 	        global_socket.emit('twit', data);
 	    });
+	console.log(util.inspect(server.listeners('connection'));
 	});
 	
 	// Render the layout
