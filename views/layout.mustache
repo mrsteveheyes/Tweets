@@ -45,6 +45,8 @@ URL: https://github.com/mrsteveheyes/Sandbox/
     $.getScript("http://localhost:3000/socket.io/socket.io.js", function() {
     var socket = new io.Socket("localhost", {"port": 3000});
     socket.on("message", function(json) {
+    console.log('data received');
+    socket.emit('ack');
     data = JSON.parse(json);
     $("<li></li>").text("@" + data.user.screen_name + " " + data.text).prependTo("ul");
     });
