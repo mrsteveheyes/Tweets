@@ -14,8 +14,8 @@ app.configure(function() {
 
 // CONFIG FOR TWITTER
 var config = {
-    user: "mrsteveheyes",
-    password: "n0h4sand",
+    user: "",
+    password: "",
     track: ["#nodetwitter"]};
     
 var socket = require('socket.io').listen(app),

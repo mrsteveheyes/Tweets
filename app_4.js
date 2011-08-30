@@ -1,8 +1,8 @@
 var http = require('http');
 
 var config = {
-user: "mrsteveheyes",
-password: "n0h4sand",
+user: "",
+password: "",
 track: ["#nodetwitter"]},
 sys = require('sys');
 /*
