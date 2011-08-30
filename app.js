@@ -14,9 +14,10 @@ app.configure(function() {
 });
 
 // CONFIG FOR TWITTER
+// Add your own username/pw
 var config = {
-    user: "mrsteveheyes",
-    password: "n0h4sand",
+    user: "",
+    password: "",
     track: ["#nodetwitter"]};
     
 var io = require('socket.io').listen(app),
