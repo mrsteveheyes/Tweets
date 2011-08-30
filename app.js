@@ -3,9 +3,8 @@
 // Get the required modules
 var express = require("express"),
     mustachio = require("mustachio"),
-    twitter = require('ntwitter'),
-    app = express.createServer(),
-	io = require('socket.io').listen(app);
+    sys = require("sys"),
+    app = express.createServer();
 
 // Configure the app
 app.configure(function() {
@@ -14,36 +13,45 @@ app.configure(function() {
 	app.set('view engine', 'mustache');
 });
 
-// Set Up Twitter 
-var twit = new twitter({
-    consumer_key: 'qZEChst47WZOC8So6vEidg',
-    consumer_secret: 'D0fMPwDOTTyTDOzBJdvZxmihNBVZSWbCVvJET4eWg',
-    access_token_key: '3162641-w4804S4VM1Fpx4knfRN3VDXi4BsmlRmm634WoyuVk',
-    access_token_secret: 'MQ9jmv5CRPBcq7KkfmY19DNSTSgBIs53C4nNpw'
+// CONFIG FOR TWITTER
+var config = {
+    user: "mrsteveheyes",
+    password: "n0h4sand",
+    track: ["#nodetwitter"]};
+    
+var io = require('socket.io').listen(app),
+twitter = new (require("twitter-node").TwitterNode)(config);
+
+io.addListener("clientMessage", function(socket){
+	console.log("heard by app");
+	socket.broadcast.emit('twit', tweet);
 });
 
-// Including the Socket...
-var global_socket;
+twitter
+    .addListener('error', function(error){ // Always check for errors or they popup client side
+                     console.log(error.message);
+                 })
+    .addListener('tweet', function(tweet){ // A new tweet that matches the criteria has been located
+					console.log("heard by twitter \n");
 
-// WEB SOCKETS
-io.sockets.on('connection', function (socket) {
-	global_socket = socket;
-});
+					io.emit('clientMessage', tweet);
+                 })
+    .addListener('limit', function(limit){ // New limit has been sent from the API
+                     sys.puts('LIMIT: ' + sys.inspect(limit));
+                 })
+    .addListener('delete', function(del){ // A delete event occured
+                     sys.puts('DELETE: ' + sys.inspect(del));
+                 })
+    .addListener('end', function(resp){ // API disconnect
+                     sys.puts('wave goodbye...' + resp.statusCode);
+                 })
+    .stream();
 
 // END SETUP
  
 // CONTROLLERS
 app.get("/", function(req, res){
-	
-	// Start Twitter Stream
-	twit.stream('statuses/filter', {track: "#nodetwitter"}, function(stream) {
-	    stream.on('data', function (data) {
-			// Emits on event "twit"
-	        global_socket.emit('twit', data);
-	    });
-	console.log(util.inspect(server.listeners('connection'));
-	});
-	
+
 	// Render the layout
 	res.render('layout', {
 		title: "Amy and Steve Wedding"
@@ -52,5 +60,5 @@ app.get("/", function(req, res){
 // END CONTROLLERS
 
 // GO GO GO!
-app.listen(8080);
+app.listen(3000);
 console.log("HTTP Server Started");
