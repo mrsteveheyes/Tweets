@@ -37,25 +37,7 @@ URL: https://github.com/mrsteveheyes/Sandbox/
 
 <div role="main" id="main">
 <ul></ul>
-  <script>
-    (function() {
-    var script = document.createElement("script");
-    script.src = "http://code.jquery.com/jquery.min.js";
-    script.onload = function() {
-    $.getScript("http://localhost:3000/socket.io/socket.io.js", function() {
-    var socket = new io.Socket("localhost", {"port": 3000});
-    socket.on("message", function(json) {
-    console.log('data received');
-    socket.emit('ack');
-    data = JSON.parse(json);
-    $("<li></li>").text("@" + data.user.screen_name + " " + data.text).prependTo("ul");
-    });
-    socket.connect();
-    });
-    };
-    document.getElementsByTagName("head")[0].appendChild(script);
-    })();
-  </script>
+
 </div>
 
 <div role="complementary">
@@ -92,9 +74,83 @@ s.parentNode.insertBefore(g,s)}(document,'script'));
   socket.on('twit', function (data) {
 	console.log(data);
 	if (data.text) {
-		$("#main").prepend("<p>"+data.text+"</p>");	
+		
+		var find_images = function(url)
+		{
+			if(String(url).match(/^[http:\/\/instagr.am\/p\/]/))
+			{
+				console.log("found instagram");
+				var img = "<img src='"+url+"media?size=l'  />";
+
+				$('a[href*="'+url+'"]:first').parent().append(img);
+			}
+
+			if(String(url).match(/^[twitpic\.com]/))
+			{
+				console.log("found twitpic");
+				var split = String(url).split('/');
+				var img = "<img src='http://twitpic.com/show/large/"+split[split.length-1]+"'  />";
+
+				$('a[href*="'+url+'"]:first').parent().append(img);
+			}	
+
+			if(String(url).match(/^[yfrog\.com]/))
+			{
+			//	console.log("found yfrog");
+				var split = String(url).split('/');
+				var img = "<img src='http://yfrog.com/"+split[split.length-1]+":medium'  />";
+			//	console.log(img);
+				$('a[href*="'+url+'"]:first').parent().append(img);
+			}
+		}
+		
+		var text = data.text;
+		
+		if (data.entities.urls){
+			$.each(data.entities.hashtags, function(index, value) { 
+				
+			});
+		}
+		
+		$("<li></li>").html("<a href='http://twitter.com/" + data.user.screen_name + "'>@" + data.user.screen_name + "</a>: " + data.text.parseAll()).prependTo("ul");
+
+		var url = data.text.match(/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&~\?\/.=]+/g);
+		if (url) { 
+			find_images(url);
+		}
+		if (data.entities.urls)
+		{
+			$.each(data.entities.urls, function(index, value){
+				console.log(value.expanded_url);
+				find_images(value.expanded_url);
+			})
+		}
+	//	console.log(url);
+		
 	}
  });
+
+String.prototype.parseURL = function() {
+	return this.replace(/[A-Za-z]+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&~\?\/.=]+/g, function(url) {
+		return url.link(url);
+	});
+};
+String.prototype.parseUsername = function() {
+	return this.replace(/[@]+[A-Za-z0-9-_]+/g, function(u) {
+		var username = u.replace("@","")
+		return u.link("http://twitter.com/"+username);
+	});
+};
+String.prototype.parseHashtag = function() {
+	return this.replace(/[#]+[A-Za-z0-9-_]+/g, function(t) {
+		var tag = t.replace("#","%23")
+		return t.link("http://search.twitter.com/search?q="+tag);
+	});
+};
+
+String.prototype.parseAll = function() {
+	return this.parseURL().parseUsername().parseHashtag();
+}
 </script>
 
 <noscript>Your browser does not support JavaScript!</noscript>
