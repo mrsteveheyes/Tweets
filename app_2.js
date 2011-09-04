@@ -1,11 +1,13 @@
 // SETUP
 
 // Get the required modules
-var express = require("express"),
+var _ = require("underscore")._,
+	express = require("express"),
     mustachio = require("mustachio"),
     twitter = require('ntwitter'),
     app = express.createServer(),
-	io = require('socket.io').listen(app);
+	io = require('socket.io').listen(app),
+	search_term = "#amystevewedding";
 
 // Configure the app
 app.configure(function() {
@@ -22,37 +24,45 @@ var twit = new twitter({
     access_token_secret: 'MQ9jmv5CRPBcq7KkfmY19DNSTSgBIs53C4nNpw'
 });
 
-// Including the Socket...
-var global_socket = io.socket;
-var data = {text: "We have lift off"};
-
-// WEB SOCKETS
-io.sockets.on("connection", function(socket){
-
-	socket.on("clientMessage", function(tweet){
-		console.log(tweet);
-		socket.broadcast.emit('twit', tweet);
-	})
-	
+// Start Twitter Stream
+twit.stream('statuses/filter', {track: search_term}, function(stream) {
+    stream.on('data', function (data) {
+		io.sockets.emit('twit', data);
+    });
 });
 
-// Start Twitter Stream
-twit.stream('statuses/filter', {track: "#nodetwitter"}, function(stream) {
-    stream.on('data', function (data) {
-		console.log(data);
-		io.sockets.emit("clientMessage", data);
-    });
+// IO Connection
+io.sockets.on('connection', function (socket) {
+	
+	twit.search(search_term, {
+		include_entities: true
+	}, function(err, data) {
+		
+		_.each(data.results.reverse(), function(data){
+			io.sockets.emit('twit', data);
+		});
+		
+		io.sockets.emit('tweets', data);
+			
+	});
+	
 });
 
 // END SETUP
  
 // CONTROLLERS
 app.get("/", function(req, res){
+	
+	var output = {
+		title: "Amy and Steve Wedding",
+		tweets: ""
+	}
 
+	console.log(output.tweets);
+	
 	// Render the layout
-	res.render('layout', {
-		title: "Amy and Steve Wedding"
-	});
+	res.render('layout', output);
+	
 });
 // END CONTROLLERS
 

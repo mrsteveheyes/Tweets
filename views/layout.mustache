@@ -36,7 +36,10 @@ URL: https://github.com/mrsteveheyes/Sandbox/
 <div class="content clearfix container_16">
 
 <div role="main" id="main">
-<ul></ul>
+	
+	<p id="loading">Loading&hellip;</p>
+	
+	<ul></ul>
 
 </div>
 
@@ -70,9 +73,39 @@ s.parentNode.insertBefore(g,s)}(document,'script'));
 <script src="/socket.io/socket.io.js"></script>
 <script>
 
+String.prototype.parseURL = function() {
+	return this.replace(/[A-Za-z]+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&~\?\/.=]+/g, function(url) {
+		return url.link(url);
+	});
+};
+String.prototype.parseUsername = function() {
+	return this.replace(/[@]+[A-Za-z0-9-_]+/g, function(u) {
+		var username = u.replace("@","")
+		return u.link("http://twitter.com/"+username);
+	});
+};
+String.prototype.parseHashtag = function() {
+	return this.replace(/[#]+[A-Za-z0-9-_]+/g, function(t) {
+		var tag = t.replace("#","%23")
+		return t.link("http://search.twitter.com/search?q="+tag);
+	});
+};
+
+String.prototype.parseAll = function() {
+	return this.parseURL().parseUsername().parseHashtag();
+}
+
+
   var socket = io.connect('http://127.0.0.1:8080');
+  
   socket.on('twit', function (data) {
-	console.log(data);
+  	
+  	console.log(data);
+  	
+  	$("#loading").fadeOut("fast", function(){
+  		$(this).remove();
+  	});
+
 	if (data.text) {
 		
 		var find_images = function(url)
@@ -105,52 +138,20 @@ s.parentNode.insertBefore(g,s)}(document,'script'));
 		}
 		
 		var text = data.text;
+		var username = ""
 		
-		if (data.entities.urls){
-			$.each(data.entities.hashtags, function(index, value) { 
-				
-			});
-		}
-		
-		$("<li></li>").html("<a href='http://twitter.com/" + data.user.screen_name + "'>@" + data.user.screen_name + "</a>: " + data.text.parseAll()).prependTo("ul");
-
-		var url = data.text.match(/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&~\?\/.=]+/g);
-		if (url) { 
-			find_images(url);
-		}
-		if (data.entities.urls)
+		if(data.user)
 		{
-			$.each(data.entities.urls, function(index, value){
-				console.log(value.expanded_url);
-				find_images(value.expanded_url);
-			})
+			username = data.user.screen_name;
+		} else {
+			username = data.from_user;
 		}
-	//	console.log(url);
 		
+		$("<li></li>").html("<a href='http://twitter.com/" + username + "'>@" + username + "</a>: " + data.text.parseAll()).prependTo("ul");
+
 	}
  });
 
-String.prototype.parseURL = function() {
-	return this.replace(/[A-Za-z]+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&~\?\/.=]+/g, function(url) {
-		return url.link(url);
-	});
-};
-String.prototype.parseUsername = function() {
-	return this.replace(/[@]+[A-Za-z0-9-_]+/g, function(u) {
-		var username = u.replace("@","")
-		return u.link("http://twitter.com/"+username);
-	});
-};
-String.prototype.parseHashtag = function() {
-	return this.replace(/[#]+[A-Za-z0-9-_]+/g, function(t) {
-		var tag = t.replace("#","%23")
-		return t.link("http://search.twitter.com/search?q="+tag);
-	});
-};
-
-String.prototype.parseAll = function() {
-	return this.parseURL().parseUsername().parseHashtag();
-}
 </script>
 
 <noscript>Your browser does not support JavaScript!</noscript>
