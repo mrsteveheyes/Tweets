@@ -94,7 +94,33 @@ String.prototype.parseHashtag = function() {
 String.prototype.parseAll = function() {
 	return this.parseURL().parseUsername().parseHashtag();
 }
+  var find_images = function(url)
+		{
+			
+			if(String(url).match(/instagr.am\/p\//))
+			{
+				console.log("found instagram");
+				var img = "<img src='http://"+url+"media?size=l'  />";
+				return img;
+			}
 
+			if(String(url).match(/twitpic\.com/))
+			{
+				console.log("found twitpic");
+				var split = String(url).split('/');
+				var img = "<img src='http://twitpic.com/show/large/"+split[split.length-1]+"'  />";
+				return img;
+			}	
+
+			if(String(url).match(/yfrog\.com/))
+			{
+			//	console.log("found yfrog");
+				var split = String(url).split('/');
+				var img = "<img src='http://yfrog.com/"+split[split.length-1]+":medium'  />";
+			//	console.log(img);
+				return img;
+			}
+		}
 
   var socket = io.connect('http://127.0.0.1:8080');
   
@@ -105,40 +131,25 @@ String.prototype.parseAll = function() {
   	$("#loading").fadeOut("fast", function(){
   		$(this).remove();
   	});
-
-	if (data.text) {
-		
-		var find_images = function(url)
+	
+	if (data.entities)
+	{
+		if (data.entities.urls)
 		{
-			if(String(url).match(/^[http:\/\/instagr.am\/p\/]/))
-			{
-				console.log("found instagram");
-				var img = "<img src='"+url+"media?size=l'  />";
-
+			$.each(data.entities.urls, function(index, value){
+				console.log("value");
+				var url = value.url;
+				var img = find_images(value.display_url);
+				console.log(url);
 				$('a[href*="'+url+'"]:first').parent().append(img);
-			}
-
-			if(String(url).match(/^[twitpic\.com]/))
-			{
-				console.log("found twitpic");
-				var split = String(url).split('/');
-				var img = "<img src='http://twitpic.com/show/large/"+split[split.length-1]+"'  />";
-
-				$('a[href*="'+url+'"]:first').parent().append(img);
-			}	
-
-			if(String(url).match(/^[yfrog\.com]/))
-			{
-			//	console.log("found yfrog");
-				var split = String(url).split('/');
-				var img = "<img src='http://yfrog.com/"+split[split.length-1]+":medium'  />";
-			//	console.log(img);
-				$('a[href*="'+url+'"]:first').parent().append(img);
-			}
+			});
 		}
+	}
 		
+	if (data.text) {
+
 		var text = data.text;
-		var username = ""
+		var username = "";
 		
 		if(data.user)
 		{
@@ -146,9 +157,17 @@ String.prototype.parseAll = function() {
 		} else {
 			username = data.from_user;
 		}
+		var id = Math.floor(Math.random()*1000000000000000000)
+		$("<li></li>").attr("id", "tweet"+id).html("<a href='http://twitter.com/" + username + "'>@" + username + "</a>: " + data.text.parseAll()).prependTo("ul");
 		
-		$("<li></li>").html("<a href='http://twitter.com/" + username + "'>@" + username + "</a>: " + data.text.parseAll()).prependTo("ul");
-
+/*
+		var img = find_images(text);
+		if(img)
+		{
+			$("#tweet"+id).append(img);
+		}
+*/
+		
 	}
  });
 
