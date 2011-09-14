@@ -7,7 +7,7 @@ var _ = require("underscore")._,
     twitter = require('ntwitter'),
     app = express.createServer(),
 	io = require('socket.io').listen(app),
-	search_term = "#amystevewedding";
+	search_term = "#testing123";
 
 // Configure the app
 app.configure(function() {

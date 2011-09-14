@@ -131,21 +131,8 @@ String.prototype.parseAll = function() {
   	$("#loading").fadeOut("fast", function(){
   		$(this).remove();
   	});
-	
-	if (data.entities)
-	{
-		if (data.entities.urls)
-		{
-			$.each(data.entities.urls, function(index, value){
-				console.log("value");
-				var url = value.url;
-				var img = find_images(value.display_url);
-				console.log(url);
-				$('a[href*="'+url+'"]:first').parent().append(img);
-			});
-		}
-	}
 		
+	var id = Math.floor(Math.random()*1000000000000000000);
 	if (data.text) {
 
 		var text = data.text;
@@ -157,17 +144,24 @@ String.prototype.parseAll = function() {
 		} else {
 			username = data.from_user;
 		}
-		var id = Math.floor(Math.random()*1000000000000000000)
 		$("<li></li>").attr("id", "tweet"+id).html("<a href='http://twitter.com/" + username + "'>@" + username + "</a>: " + data.text.parseAll()).prependTo("ul");
 		
-/*
-		var img = find_images(text);
-		if(img)
+	}
+	
+	if (data.entities)
+	{
+		if (data.entities.urls)
 		{
-			$("#tweet"+id).append(img);
+			$.each(data.entities.urls, function(index, value){
+				console.log("value");
+				var url = value.url;
+				var img = find_images(value.display_url);
+				console.log(img);
+				console.log(url);
+				console.log(id);
+				$('#tweet'+id).append(img);
+			});
 		}
-*/
-		
 	}
  });
 
