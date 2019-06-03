@@ -1,14 +1,19 @@
 {
-	"name": "Tweets"
-  , "version": "0.0.1"
-  , "private": true
-  , "dependencies": {
-      "express": "2.4.3"
-    , "jade": ">= 0.0.1"
-	, "socket.io": ">= 0.7.x"
-	, "mustachio": ">= 0.2.x"
-	, "twitter-node": ">= 0.x"
-	, "ntwitter": ">= 0.2.x"
-
-  }
+  "name": "Tweets",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "3.11.0",
+    "jade": ">= 0.0.1",
+    "socket.io": ">= 0.7.x",
+    "mustachio": ">= 0.2.x",
+    "twitter-node": ">= 0.x",
+    "ntwitter": ">= 0.2.x",
+    "snyk": "^1.171.0"
+  },
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
+  },
+  "snyk": true
 }
